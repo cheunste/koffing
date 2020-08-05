@@ -1,0 +1,52 @@
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt
+ERROR:root:failed to copy file to DummyDest\test.txt. Error <class 'Exception'>
+ERROR:root:failed to copy file to DummyDest\test.txt. Error copy() takes 2 positional arguments but 3 were given
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Attempting to get service: Telephony from None
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Pausing service: telephony on None. Status: (0,)
+DEBUG:root:resuming service: telephony on None. Status: (0,)
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Attempting to get service: Telephony from None
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Pausing service: telephony on None. Status: (0,)
+DEBUG:root:resuming service: telephony on None. Status: (0,)
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Attempting to get service: Telephony from None
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Pausing service: telephony on None. Status: (0,)
+DEBUG:root:resuming service: telephony on None. Status: (0,)
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Attempting to get service: Telephony from None
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Pausing service: telephony on None. Status: (0,)
+DEBUG:root:resuming service: telephony on None. Status: (0,)
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Attempting to get service: Telephony from None
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Pausing service: telephony on None. Status: (0,)
+DEBUG:root:resuming service: telephony on None. Status: (0,)
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Attempting to get service: Telephony from None
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Pausing service: telephony on None. Status: (0,)
+DEBUG:root:resuming service: telephony on None. Status: (0,)
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Attempting to get service: Telephony from None
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Pausing service: telephony on None. Status: (0,)
+DEBUG:root:resuming service: telephony on None. Status: (0,)
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Attempting to get service: Telephony from None
+DEBUG:root:Attempting to terminate notepad.exe on None
+DEBUG:root:Pausing service: telephony on None. Status: (0,)
+DEBUG:root:resuming service: telephony on None. Status: (0,)
