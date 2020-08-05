@@ -97,7 +97,7 @@ if __name__ == "__main__":
 	process = "Zubat.exe"
 	file = f".//Zubat.exe"
 	sample_packet_size = 50
-	max_acceptable_timeout = 500
+	max_acceptable_ping_response = 500
 	if not check_file_exists(file):
 		logging.error(f"{file} does not exist in the current directory, please make sure it is before running.")
 	else:
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 			koffing = Koffing(hostname, None, None)
 			##check ping
 			ping_responses = koffing.get_ping_response_in_ms(hostname, sample_packet_size)
-			if ping_responses > max_acceptable_timeout:
+			if ping_responses > max_acceptable_ping_response:
 				logging.error(
 					f"Ping responses to {hostname} is {ping_responses}, which is kinda high. Going to skip this site.")
 				continue
