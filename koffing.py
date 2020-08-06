@@ -6,6 +6,7 @@ import win32api
 import shutil
 import win32wnet
 import logging
+import time
 
 
 class Koffing:
@@ -39,28 +40,33 @@ class Koffing:
 
 	def get_service(self, service_name):
 		logging.debug(f"Attempting to get service: {service_name} from {self.machine_name}")
-		return self.get_machine_connection().Win32_Service(DisplayName=service_name)
+		return self.get_machine_connection().Win32_Service(Name=service_name)
 
 	def pause_service(self, service_name):
 		c = self.get_machine_connection()
-		for service in c.Win32_Service(DisplayName=service_name):
+		state = 0
+		for service in c.Win32_Service(Name=service_name):
 			state = service.PauseService()
 			logging.debug(f"Pausing service: {service_name} on {self.machine_name}. Status: {state}")
 		return state
 
 	def resume_service(self, service_name):
 		c = self.get_machine_connection()
-		for service in c.Win32_Service(DisplayName=service_name):
+		state = 0
+		for service in c.Win32_Service(Name=service_name):
 			state = service.ResumeService()
 			logging.debug(f"resuming service: {service_name} on {self.machine_name}. Status: {state}")
 		return state
 
 	def terminate_process(self, process_name):
 		client = self.get_machine_connection()
-		for process in client.Win32_Process(Description=f"{process_name}".format(process_name)):
-			logging.debug(f"Attempting to terminate {process_name} on {self.machine_name}")
-			process.Terminate()
-			return
+		all_processes = client.Win32_Process(Description=f"{process_name}".format(process_name))
+		for process in all_processes:
+			try:
+				process.Terminate()
+			except:
+				logging.error(f"Failed to terminate {process_name} with process details: {process}")
+		return
 
 	def get_file_paths(self, process_name):
 		return [process.ExecutablePath for process in
@@ -87,8 +93,10 @@ def get_list_of_sites_from_file():
 		site_list = [site.replace("\n", "") for site in f]
 	return site_list
 
+
 def check_file_exists(file):
 	return os.path.exists(file)
+
 
 if __name__ == "__main__":
 	logging.basicConfig(filename="koffing.log", level=logging.DEBUG)
@@ -106,11 +114,11 @@ if __name__ == "__main__":
 			## Create new Koffing
 			koffing = Koffing(hostname, None, None)
 			##check ping
-			ping_responses = koffing.get_ping_response_in_ms(hostname, sample_packet_size)
-			if ping_responses > max_acceptable_ping_response:
-				logging.error(
-					f"Ping responses to {hostname} is {ping_responses}, which is kinda high. Going to skip this site.")
-				continue
+			# ping_responses = koffing.get_ping_response_in_ms(hostname, sample_packet_size)
+			# if ping_responses > max_acceptable_ping_response:
+			#	logging.error(
+			#		f"Ping responses to {hostname} is {ping_responses}, which is kinda high. Going to skip this site.")
+			#	continue
 			## Stop the watchdogt sevice
 			koffing.pause_service(service)
 			## Get the path of all the processes
@@ -119,6 +127,7 @@ if __name__ == "__main__":
 			koffing.terminate_process(process)
 			## Replace the Zubat.exe file
 			for file_path in process_file_path:
+				logging.debug(f"attempting to replace {file_path}")
 				new_file_path = koffing.reformat_path_to_unc(file_path)
 				koffing.replace_file(f".//{file}", new_file_path)
 			## start back up the watchdog server
