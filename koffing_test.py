@@ -20,7 +20,7 @@ class KoffingTestCases(unittest.TestCase):
 		self.assertTrue(service_name is not None)
 
 	def test_pause_service(self):
-		some_service = "telephony"
+		some_service = "TapiSrv"
 		accepted_status_code = 0
 		already_paused_status = 24
 		status_code = self.test_koffing.pause_service(some_service)[0]
@@ -28,7 +28,7 @@ class KoffingTestCases(unittest.TestCase):
 			f"Status code is {status_code} implies service is not paused")
 
 	def test_resume_service(self):
-		some_service = "telephony"
+		some_service = "TapiSrv"
 		accepted_status_code = 0
 		already_running_status = 10
 		status_code = self.test_koffing.resume_service(some_service)[0]
