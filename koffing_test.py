@@ -5,6 +5,7 @@ import os
 import shutil
 import time
 import koffing
+import sqlite3
 
 
 class KoffingTestCases(unittest.TestCase):
@@ -66,6 +67,30 @@ class KoffingTestCases(unittest.TestCase):
 			path_slice = path[2:]
 			correct_path = f"\\\\None\\D${path_slice}"
 			self.assertTrue(full_unc_path == correct_path)
+
+	def test_check_sql_file(self):
+		self.assertTrue( koffing.sql_file_exists("./Koffing.sql"))
+
+	def test_read_from_sql_script(self):
+		self.assertIsNotNone(koffing.read_sql_script_content("./Koffing.sql"))
+
+	def test_update_database(self):
+		database_path = r"./ZubatConfiguration.db"
+		script_path = r"./Koffing.sql"
+
+		script_content = koffing.read_sql_script_content(script_path)
+		self.test_koffing.update_database(database_path, script_content)
+		conn = sqlite3.connect(database_path)
+		for row in conn.cursor().execute("SELECT DefaultValue from SystemInputTags where Description='UTCOffset'"):
+			utc_value_from_db = row[0]
+
+		for row in conn.cursor().execute("SELECT DefaultValue from SystemInputTags where Description='Timeout'"):
+			timeout_from_db = row[0]
+		conn.close()
+
+		self.assertTrue(utc_value_from_db == "-9")
+		self.assertTrue(timeout_from_db == "10")
+
 
 	### Private methods here
 

@@ -7,6 +7,7 @@ import shutil
 import win32wnet
 import logging
 import time
+import sqlite3
 
 
 class Koffing:
@@ -83,6 +84,12 @@ class Koffing:
 			logging.error(f"failed to copy file to {dest_path}. Error {err}")
 		return
 
+	def update_database(self,database_file_path,script_content):
+		db = sqlite3.connect(database_file_path)
+		db.cursor().executescript(script_content)
+		db.commit()
+		db.close()
+
 	def is_service_running(self, service):
 		return win32serviceutil.QueryServiceStatus(service, self.machine_name)[1] == 4
 
@@ -94,9 +101,18 @@ def get_list_of_sites_from_file():
 	return site_list
 
 
+def read_sql_script_content(script_path):
+	with open(script_path,'r') as sql_file:
+		sql_script = sql_file.read()
+	return sql_script
+
 def check_file_exists(file):
 	return os.path.exists(file)
 
+
+def sql_file_exists(sql_file):
+	logging.debug(f"Sql file detected. Will be updating database along with Zubat")
+	return os.path.exists(sql_file)
 
 if __name__ == "__main__":
 	logging.basicConfig(filename="koffing.log", level=logging.DEBUG)
@@ -104,11 +120,18 @@ if __name__ == "__main__":
 	service = "Watchdog"
 	process = "Zubat.exe"
 	file = f".//Zubat.exe"
+	sql_script_path = r"./Koffing.sql"
 	sample_packet_size = 50
 	max_acceptable_ping_response = 500
+	parse_sql = sql_file_exists(sql_script_path)
+
+	if parse_sql:
+		script_content = read_sql_script_content(sql_script_path)
+
 	if not check_file_exists(file):
 		logging.error(f"{file} does not exist in the current directory, please make sure it is before running.")
 	else:
+		#Check if SQL file eixsts
 		for hostname in file_list:
 			print(hostname)
 			## Create new Koffing
@@ -121,6 +144,7 @@ if __name__ == "__main__":
 			#	continue
 			## Stop the watchdogt sevice
 			koffing.pause_service(service)
+
 			## Get the path of all the processes
 			process_file_path = koffing.get_file_paths(process)
 			## Kill all running process
@@ -130,5 +154,8 @@ if __name__ == "__main__":
 				logging.debug(f"attempting to replace {file_path}")
 				new_file_path = koffing.reformat_path_to_unc(file_path)
 				koffing.replace_file(f".//{file}", new_file_path)
+				if parse_sql:
+					logging.debug(f"Updating Database for {hostname}")
+					koffing.update_database(f"{new_file_path}\\Database\\ZubatConfiguration.db",script_content)
 			## start back up the watchdog server
 			koffing.resume_service(service)
