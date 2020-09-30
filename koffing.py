@@ -150,6 +150,7 @@ if __name__ == "__main__":
 			## Kill all running process
 			koffing.terminate_process(process)
 			## Replace the Zubat.exe file
+			logging.debug(f"process file paths: {process_file_path}")
 			for file_path in process_file_path:
 				logging.debug(f"attempting to replace {file_path}")
 				new_file_path = koffing.reformat_path_to_unc(file_path)
