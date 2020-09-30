@@ -95,7 +95,7 @@ class Koffing:
 
 
 def get_list_of_sites_from_file():
-	f = open('ZubatUccList', 'r')
+	f = open('ZubatUccList.txt', 'r')
 	with(f):
 		site_list = [site.replace("\n", "") for site in f]
 	return site_list
