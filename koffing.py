@@ -98,6 +98,8 @@ class Koffing:
 		return win32serviceutil.QueryServiceStatus(service, self.machine_name)[1] == 4
 
 
+
+
 def get_list_of_sites_from_file():
 	f = open('ZubatUccList.txt', 'r')
 	with(f):
@@ -117,6 +119,10 @@ def check_file_exists(file):
 def sql_file_exists(sql_file):
 	logging.debug(f"Sql file detected. Will be updating database along with Zubat")
 	return os.path.exists(sql_file)
+
+def zubat_folders_in_path(path):
+	return [files for files in path if 'Zubat' in files]
+
 
 if __name__ == "__main__":
 	logging.basicConfig(filename="koffing.log", level=logging.DEBUG)
@@ -167,7 +173,17 @@ if __name__ == "__main__":
 					koffing.update_database(database_path,script_content)
 
 			if len(file_path) == 0:
-				logging.error("No Instance of Zubat Running. Failing to run script")
+				logging.error("No Instance of Zubat Running. Attempting to Get the folders from the directory instead.")
+				d_path = fr"\\{hostname}\D$\Program Files\IBERINCO"
+				zubat_folders = zubat_folders_in_path(d_path)
+				if(len(zubat_folders) == 0):
+					logging.error(f"No Zubat folders found in {hostname}'s D drive. Is Zubat deployed to {hostname}?")
+				else:
+					for zubat in zubat_folders:
+						logging.debug(f"Attempting to replace Zubat.exe in {hostname}'s {d_path}")
+						new_file_path = d_path+f"\{zubat}"
+						koffing.replace_file(f".//{file}", new_file_path)
+
 
 			## start back up the watchdog server
 			koffing.resume_service(service)

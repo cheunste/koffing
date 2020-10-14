@@ -96,6 +96,15 @@ class KoffingTestCases(unittest.TestCase):
 		self.assertTrue(utc_value_from_db == "-9")
 		self.assertTrue(timeout_from_db == "10")
 
+	def test_get_zubat_directories(self):
+		#Assume this is a list of files in the XXXX directory
+		current_directory_listing = os.listdir('.')
+		current_directory_listing.append('Zubat-XXXXX')
+		current_directory_listing.append('Zubat-YYYYY')
+		current_directory_listing.append('Zubat')
+		list_of_zubat_folders = koffing.zubat_folders_in_path(current_directory_listing)
+		#There can be more Zubat files in the directory mainly because of all the stuf you have in this folder
+		self.assertTrue(len(list_of_zubat_folders) >= 3)
 
 	### Private methods here
 
