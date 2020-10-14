@@ -54,6 +54,11 @@ class KoffingTestCases(unittest.TestCase):
 			self.assertTrue(path == "C:\\WINDOWS\\system32\\notepad.exe")
 		self.test_koffing.terminate_process(self.process_name)
 
+	def test_no_file_paths(self):
+		file_paths = self.test_koffing.get_file_paths(self.process_name)
+		self.assertTrue(not file_paths)
+		return
+
 	def test_replace_file(self):
 		self.test_koffing.replace_file("DummySource\\test.txt", "DummyDest\\test.txt")
 		self.verify_copied_file()

@@ -86,7 +86,11 @@ class Koffing:
 
 	def update_database(self,database_file_path,script_content):
 		db = sqlite3.connect(database_file_path)
-		db.cursor().executescript(script_content)
+		try:
+			db.cursor().executescript(script_content)
+		except:
+			logging.debug("Issue detected when attempt to update the database")
+
 		db.commit()
 		db.close()
 
@@ -151,6 +155,7 @@ if __name__ == "__main__":
 			koffing.terminate_process(process)
 			## Replace the Zubat.exe file
 			logging.debug(f"process file paths: {process_file_path}")
+
 			for file_path in process_file_path:
 				logging.debug(f"attempting to replace {file_path}")
 				new_file_path = koffing.reformat_path_to_unc(file_path)
@@ -160,5 +165,9 @@ if __name__ == "__main__":
 					database_path = f"{new_file_path}\\Database\\ZubatConfiguration.db"
 					logging.debug(f"Updating the database in {database_path}")
 					koffing.update_database(database_path,script_content)
+
+			if len(file_path) == 0:
+				logging.error("No Instance of Zubat Running. Failing to run script")
+
 			## start back up the watchdog server
 			koffing.resume_service(service)
