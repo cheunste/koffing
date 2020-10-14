@@ -183,6 +183,11 @@ if __name__ == "__main__":
 						logging.debug(f"Attempting to replace Zubat.exe in {hostname}'s {d_path}")
 						new_file_path = d_path+f"\{zubat}"
 						koffing.replace_file(f".//{file}", new_file_path)
+						if parse_sql:
+							logging.debug(f"Updating Database for {hostname}")
+							database_path = f"{new_file_path}\\Database\\ZubatConfiguration.db"
+							logging.debug(f"Updating the database in {database_path}")
+							koffing.update_database(database_path, script_content)
 
 
 			## start back up the watchdog server
