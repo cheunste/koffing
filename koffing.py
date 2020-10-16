@@ -85,14 +85,15 @@ class Koffing:
 		return
 
 	def update_database(self,database_file_path,script_content):
-		db = sqlite3.connect(database_file_path)
 		try:
+			db = sqlite3.connect(database_file_path)
 			db.cursor().executescript(script_content)
-		except:
-			logging.debug("Issue detected when attempt to update the database")
-
-		db.commit()
-		db.close()
+			db.commit()
+			db.close()
+		except Exception as error:
+			message=f"Issue detected when attempt to update the database in {database_file_path}. Error: {error}"
+			print(message)
+			logging.debug(message)
 
 	def is_service_running(self, service):
 		return win32serviceutil.QueryServiceStatus(service, self.machine_name)[1] == 4
@@ -168,7 +169,7 @@ if __name__ == "__main__":
 				koffing.replace_file(f".//{file}", new_file_path)
 				if parse_sql:
 					logging.debug(f"Updating Database for {hostname}")
-					database_path = f"{new_file_path}\\Database\\ZubatConfiguration.db"
+					database_path = f"{new_file_path[:-9]}\\Database\\ZubatConfiguration.db"
 					logging.debug(f"Updating the database in {database_path}")
 					koffing.update_database(database_path,script_content)
 
@@ -186,7 +187,7 @@ if __name__ == "__main__":
 						koffing.replace_file(f".//{file}", new_file_path+"Zubat.exe")
 						if parse_sql:
 							logging.debug(f"Updating Database for {hostname}")
-							database_path = f"{new_file_path}\\Database\\ZubatConfiguration.db"
+							database_path = f"{new_file_path}Database/ZubatConfiguration.db"
 							logging.debug(f"Updating the database in {database_path}")
 							koffing.update_database(database_path, script_content)
 
