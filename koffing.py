@@ -137,7 +137,11 @@ if __name__ == "__main__":
 	parse_sql = sql_file_exists(sql_script_path)
 
 	if parse_sql:
-		script_content = read_sql_script_content(sql_script_path)
+		use_sql = input("SQL file detected. Do you want to apply using the SQL for all sites? y/n")
+		if(use_sql.lower() == "y"):
+			script_content = read_sql_script_content(sql_script_path)
+		else:
+			logging.debug("Skipping using SQL file")
 
 	if not check_file_exists(file):
 		logging.error(f"{file} does not exist in the current directory, please make sure it is before running.")
