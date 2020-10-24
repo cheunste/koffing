@@ -182,6 +182,28 @@ def no_running_zubat_process_found(hostname,logging):
 			if parse_sql:
 				update_zubat_sql(new_file_path,hostname)
 
+def update_zubat(file_list,logging):
+	for hostname in file_list:
+		print(hostname)
+		#check_site_response(hostname,logging)
+		koffing = Koffing(hostname, None, None)
+		koffing.pause_service(service)
+		process_file_path = koffing.get_file_paths(zubat_remote_process)
+		koffing.terminate_process(zubat_remote_process)
+		logging.debug(f"process file paths: {process_file_path}")
+
+		for file_path in process_file_path:
+			logging.debug(f"attempting to replace {file_path}")
+			new_file_path = koffing.reformat_path_to_unc(file_path)
+			koffing.replace_file(f".//{zubat_local_exe}", new_file_path)
+			if parse_sql:
+				update_zubat_sql(new_file_path[:-9],hostname)
+
+		if len(process_file_path) == 0:
+			no_running_zubat_process_found(hostname,logging)
+
+		## start back up the watchdog server
+		koffing.resume_service(service)
 
 
 if __name__ == "__main__":
@@ -193,8 +215,6 @@ if __name__ == "__main__":
 	sql_script_path = r"./Koffing.sql"
 	parse_sql = sql_file_exists(sql_script_path)
 
-	#check_site_response(hostname,logging)
-
 	if parse_sql:
 		use_sql = input("SQL file detected. Do you want to apply using the SQL for all sites? y/n")
 		if(use_sql.lower() == "y"):
@@ -205,24 +225,5 @@ if __name__ == "__main__":
 	if not check_file_exists(zubat_local_exe):
 		logging.error(f"{zubat_local_exe} does not exist in the current directory, please make sure it is before running.")
 	else:
-		#Check if SQL file eixsts
-		for hostname in file_list:
-			print(hostname)
-			koffing = Koffing(hostname, None, None)
-			koffing.pause_service(service)
-			process_file_path = koffing.get_file_paths(zubat_remote_process)
-			koffing.terminate_process(zubat_remote_process)
-			logging.debug(f"process file paths: {process_file_path}")
-
-			for file_path in process_file_path:
-				logging.debug(f"attempting to replace {file_path}")
-				new_file_path = koffing.reformat_path_to_unc(file_path)
-				koffing.replace_file(f".//{zubat_local_exe}", new_file_path)
-				if parse_sql:
-					update_zubat_sql(new_file_path[:-9],hostname)
-
-			if len(process_file_path) == 0:
-				no_running_zubat_process_found(hostname,logging)
-
-			## start back up the watchdog server
-			koffing.resume_service(service)
+		update_zubat(file_list,logging)
+	articuno_check()
