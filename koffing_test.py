@@ -125,7 +125,7 @@ class KoffingTestCases(unittest.TestCase):
 class FileHandlerTest(unittest.TestCase):
 
 	def test_read_txt_file(self):
-		site_list = koffing.get_list_of_sites_from_file()
+		site_list = koffing.get_list_of_zubat_sites_from_file()
 		self.assertTrue(len(site_list)>4)
 		print(site_list)
 
