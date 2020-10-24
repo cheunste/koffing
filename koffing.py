@@ -98,7 +98,7 @@ class Koffing:
 	def is_service_running(self, service):
 		return win32serviceutil.QueryServiceStatus(service, self.machine_name)[1] == 4
 
-def check_site_response(hostname,logging):
+def check_site_response(koffing,hostname,logging):
 	##check latency to the machine
 	sample_packet_size = 50
 	max_acceptable_ping_response = 500
@@ -106,13 +106,6 @@ def check_site_response(hostname,logging):
 	if ping_responses > max_acceptable_ping_response:
 		logging.error(f"Ping responses to {hostname} is {ping_responses}, which is kinda high. Going to skip this site.")
 
-def articuno_check():
-	articuno_local_process = "./articuno.exe"
-	if check_file_exists(articuno_local_process):
-		logging.debug("articuno.exe detected in the folder. Attempting to update Articuno")
-		for sites in get_list_of_articuno_sites_from_file():
-			pass
-		pass
 
 def get_list_of_zubat_sites_from_file():
 	f = open('ZubatUccList.txt', 'r')
@@ -121,10 +114,13 @@ def get_list_of_zubat_sites_from_file():
 	return site_list
 
 def get_list_of_articuno_sites_from_file():
-	f = open('ArticunoSites.txt', 'r')
-	with(f):
-		site_list = [site.replace("\n", "") for site in f]
-	return site_list
+	try:
+		f = open('ArticunoSites.txt', 'r')
+		with(f):
+			site_list = [site.replace("\n", "") for site in f]
+		return site_list
+	except:
+		return []
 
 
 def read_sql_script_content(script_path):
@@ -143,31 +139,13 @@ def sql_file_exists(sql_file):
 def zubat_folders_in_path(path):
 	return [files for files in os.listdir(path) if 'Zubat' in files]
 
-def no_instances_running():
-	logging.error("No Instance of Zubat Running. Attempting to Get the folders from the directory instead.")
-	d_path = fr"//{hostname}/D$/Program Files/IBERINCO"
-	zubat_folders = zubat_folders_in_path(d_path)
-	if(len(zubat_folders) == 0):
-		logging.error(f"No Zubat folders found in {hostname}'s D drive {d_path}. Is Zubat deployed to {hostname}?")
-		logging.error(f"zubat_folders: {zubat_folders}")
-	else:
-		for zubat in zubat_folders:
-			logging.debug(f"Attempting to replace Zubat.exe in {hostname}'s {d_path}")
-			new_file_path = d_path+f"/{zubat}/"
-			koffing.replace_file(f".//{zubat_local_exe}", new_file_path+"Zubat.exe")
-			if parse_sql:
-				logging.debug(f"Updating Database for {hostname}")
-				database_path = f"{new_file_path}Database/ZubatConfiguration.db"
-				logging.debug(f"Updating the database in {database_path}")
-				koffing.update_database(database_path, script_content)
-
-def update_zubat_sql(zubat_file_path,hostname):
+def update_zubat_sql(koffing,zubat_file_path,hostname):
 	logging.debug(f"Updating Database for {hostname}")
 	database_path = f"{zubat_file_path}Database/ZubatConfiguration.db"
 	logging.debug(f"Updating the zubat database in {database_path}")
 	koffing.update_database(database_path, script_content)
 
-def no_running_zubat_process_found(hostname,logging):
+def no_running_zubat_process_found(koffing,hostname,logging):
 	logging.error("No Instance of Zubat Running. Attempting to Get the folders from the directory instead.")
 	d_path = fr"//{hostname}/D$/Program Files/IBERINCO"
 	zubat_folders = zubat_folders_in_path(d_path)
@@ -180,12 +158,13 @@ def no_running_zubat_process_found(hostname,logging):
 			new_file_path = d_path+f"/{zubat}/"
 			koffing.replace_file(f".//{zubat_local_exe}", new_file_path+"Zubat.exe")
 			if parse_sql:
-				update_zubat_sql(new_file_path,hostname)
+				update_zubat_sql(koffing,new_file_path,hostname)
 
 def update_zubat(file_list,logging):
+	zubat_remote_process = "Zubat.exe"
 	for hostname in file_list:
 		print(hostname)
-		#check_site_response(hostname,logging)
+		#check_site_response(koffing,hostname,logging)
 		koffing = Koffing(hostname, None, None)
 		koffing.pause_service(service)
 		process_file_path = koffing.get_file_paths(zubat_remote_process)
@@ -197,13 +176,39 @@ def update_zubat(file_list,logging):
 			new_file_path = koffing.reformat_path_to_unc(file_path)
 			koffing.replace_file(f".//{zubat_local_exe}", new_file_path)
 			if parse_sql:
-				update_zubat_sql(new_file_path[:-9],hostname)
+				update_zubat_sql(koffing,new_file_path[:-9],hostname)
 
 		if len(process_file_path) == 0:
-			no_running_zubat_process_found(hostname,logging)
+			no_running_zubat_process_found(koffing,hostname,logging)
 
 		## start back up the watchdog server
 		koffing.resume_service(service)
+
+def articuno_check(logging):
+	articuno_local_process = "./articuno.exe"
+	articuno_remote_process = "articuno.exe"
+	if check_file_exists(articuno_local_process):
+		logging.debug("articuno.exe detected in the folder. Attempting to update Articuno")
+		for hostname in get_list_of_articuno_sites_from_file():
+			print(f"Updating Articuno for {hostname}")
+			koffing = Koffing(hostname, None, None)
+			koffing.pause_service(service)
+			process_file_path = koffing.get_file_paths(articuno_remote_process)
+			koffing.terminate_process(articuno_remote_process)
+			logging.debug(f"process file paths: {process_file_path}")
+
+			for file_path in process_file_path:
+				logging.debug(f"attempting to replace {file_path}")
+				new_file_path = koffing.reformat_path_to_unc(file_path)
+				koffing.replace_file(f".//{articuno_local_process}", new_file_path)
+
+			if len(process_file_path) == 0:
+				no_running_zubat_process_found(koffing,hostname,logging)
+
+			## start back up the watchdog server
+			koffing.resume_service(service)
+
+	pass
 
 
 if __name__ == "__main__":
@@ -226,4 +231,4 @@ if __name__ == "__main__":
 		logging.error(f"{zubat_local_exe} does not exist in the current directory, please make sure it is before running.")
 	else:
 		update_zubat(file_list,logging)
-	articuno_check()
+	#articuno_check(logging)
